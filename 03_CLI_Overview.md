@@ -39,6 +39,83 @@
     ```
     These commands scaffold Angular building blocks with boilerplate code, saving time and ensuring consistency.
 
+- **Generate Options**  
+  The `ng generate` command is used to scaffold various Angular building blocks. Below is a comprehensive list of options:
+
+  - **Component:**
+    ```bash
+    ng generate component <name>
+    ```
+    Creates a new Angular component.
+
+  - **Directive:**
+    ```bash
+    ng generate directive <name>
+    ```
+    Creates a new Angular directive.
+
+  - **Service:**
+    ```bash
+    ng generate service <name>
+    ```
+    Creates a new Angular service.
+
+  - **Module:**
+    ```bash
+    ng generate module <name>
+    ```
+    Creates a new Angular module.
+
+  - **Pipe:**
+    ```bash
+    ng generate pipe <name>
+    ```
+    Creates a new Angular pipe.
+
+  - **Class:**
+    ```bash
+    ng generate class <name>
+    ```
+    Creates a new TypeScript class.
+
+  - **Guard:**
+    ```bash
+    ng generate guard <name>
+    ```
+    Creates a new Angular route guard.
+
+  - **Interface:**
+    ```bash
+    ng generate interface <name>
+    ```
+    Creates a new TypeScript interface.
+
+  - **Enum:**
+    ```bash
+    ng generate enum <name>
+    ```
+    Creates a new TypeScript enum.
+
+  - **Application:**
+    ```bash
+    ng generate application <name>
+    ```
+    Creates a new Angular application within a workspace.
+
+  - **Library:**
+    ```bash
+    ng generate library <name>
+    ```
+    Creates a new Angular library within a workspace.
+
+  - **Component Store:**
+    ```bash
+    ng generate component-store <name>
+    ```
+    Creates a new component store for state management (if using NgRx).
+
+  Each of these options can be customized further with flags and parameters to suit specific project requirements.
+
   - **Run Unit Tests:**
     ```bash
     ng test
