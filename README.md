@@ -183,22 +183,63 @@
 
 ### Lifecycle
 
-- **Component Lifecycle Hooks**
-  Lifecycle hooks like `ngOnInit`, `ngOnChanges`, and `ngOnDestroy` allow developers to tap into specific moments in a component's lifecycle.
+- **What is Component Lifecycle?**  
+  The component lifecycle in Angular refers to the sequence of events that occur from the creation of a component to its destruction. Angular provides lifecycle hooks that allow developers to execute custom logic at specific stages of this lifecycle.
+
+- **Lifecycle Stages**
+
+  1. **Creation**: The component is instantiated, and its dependencies are injected.
+  2. **Change Detection**: Angular checks for changes in the component's data-bound properties.
+  3. **Rendering**: The component's template is rendered or updated in the DOM.
+  4. **Destruction**: The component is removed from the DOM, and resources are cleaned up.
+
+- **All Lifecycle Hooks**  
+  Angular provides lifecycle hooks that allow developers to execute custom logic at specific stages of a component's lifecycle. These hooks are methods that Angular calls at specific points in the lifecycle of a component or directive.
+
+  - **`ngOnChanges`**: Called when an input property value changes. Receives a `SimpleChanges` object containing the current and previous values.
+  - **`ngOnInit`**: Called once after the component's input properties are initialized. Ideal for initialization logic.
+  - **`ngDoCheck`**: Called during every change detection cycle. Use this for custom change detection logic.
+  - **`ngAfterContentInit`**: Called once after Angular projects external content into the component's view.
+  - **`ngAfterContentChecked`**: Called after every check of the projected content.
+  - **`ngAfterViewInit`**: Called once after the component's view and child views are initialized.
+  - **`ngAfterViewChecked`**: Called after every check of the component's view and child views.
+  - **`ngOnDestroy`**: Called just before the component is destroyed. Use this for cleanup logic, such as unsubscribing from observables or detaching event handlers.
+
+  **Lifecycle Flow**:
+
+  1. `ngOnChanges` (if applicable)
+  2. `ngOnInit`
+  3. `ngDoCheck`
+  4. `ngAfterContentInit`
+  5. `ngAfterContentChecked`
+  6. `ngAfterViewInit`
+  7. `ngAfterViewChecked`
+  8. `ngOnDestroy`
+
   Example:
 
-```typescript
-ngOnInit() {
-  console.log('Component initialized');
-}
-```
-
-- **Common Lifecycle Hook Use Cases**  
-  Examples include initializing data in `ngOnInit`, cleaning up resources in `ngOnDestroy`, and responding to input changes in `ngOnChanges`.  
-  Example:
   ```typescript
-  ngOnDestroy() {
-    console.log('Component destroyed');
+  @Component({...})
+  export class MyComponent implements OnInit, OnDestroy {
+    @Input() data: string;
+    name = input('');
+
+    ngOnInit() {
+      console.log('Component initialized');
+    }
+
+    ngOnDestroy() {
+      console.log('Component destroyed');
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+    for (const inputName in changes) {
+      const inputValues = changes[inputName];
+      console.log(`Previous ${inputName} == ${inputValues.previousValue}`);
+      console.log(`Current ${inputName} == ${inputValues.currentValue}`);
+      console.log(`Is first ${inputName} change == ${inputValues.firstChange}`);
+    }
+  }
   }
   ```
 
@@ -224,20 +265,117 @@ ngOnInit() {
 
 ### Templates
 
-- **Template Syntax**  
-  Angular templates use interpolation, property binding, and structural directives.  
-  Example:
+- **What are Templates?**  
+  Templates in Angular define the structure and layout of a component's view. They use HTML along with Angular's template syntax to bind data, handle events, and control the DOM structure dynamically.
 
+- **Template Syntax Features**  
+  Angular templates provide powerful features for building dynamic and interactive views:
+  - **Interpolation**: Bind component properties to the view using `{{ }}` syntax.
+    Example:
+    ```html
+    <h1>{{ title }}</h1>
+    ```
+  - **Property Binding**: Bind DOM element properties to component properties using `[ ]`.
+    Example:
+    ```html
+    <input [value]="name" />
+    ```
+  - **Event Binding**: Bind DOM events to component methods using `( )`.
+    Example:
+    ```html
+    <button (click)="onClick()">Click Me</button>
+    ```
+  - **Two-Way Binding**: Combine property and event binding using `[( )]` for seamless data synchronization.  
+    Two-way binding allows data to flow in both directions between the component and the template. It ensures that changes in the component's property are reflected in the template, and user input in the template updates the component's property automatically. This is achieved using Angular's `[(ngModel)]` directive.
+
+    **How it Works**:  
+    - The `[( )]` syntax is a shorthand for combining property binding `[ ]` and event binding `( )`.
+    - `[ ]` binds the property value from the component to the template.
+    - `( )` listens for changes in the template and updates the component property.
+
+    **Example**:
+    ```html
+    <input [(ngModel)]="name" />
+    <p>Hello, {{ name }}!</p>
+    ```
+    In this example:
+    - The `name` property in the component is bound to the input field.
+    - Any changes made to the input field are reflected in the `name` property.
+    - The updated `name` property is displayed in the paragraph.
+
+    **Requirements**:
+    - To use `[(ngModel)]`, you must import the `FormsModule` in your Angular module.
+      ```typescript
+      import { FormsModule } from '@angular/forms';
+
+      @NgModule({
+        imports: [FormsModule],
+        ...
+      })
+      export class AppModule {}
+      ```
+
+    **Best Practices**:
+    - Use two-way binding only when necessary, as it can make debugging more complex.
+    - For better control, consider using separate property and event bindings instead of `[(ngModel)]` when appropriate.
+  - **Directives**: Use structural (`*ngIf`, `*ngFor`) and attribute (`[ngClass]`, `[ngStyle]`) directives to manipulate the DOM.
+    Example:
+    ```html
+    <div *ngIf="isVisible">Visible</div>
+    <div [ngClass]="{'active': isActive}"></div>
+    ```
+
+- **Template Expressions**  
+  Template expressions are used within bindings to perform calculations or access properties. They should be simple and free of side effects.
+  Example:
   ```html
-  <h1>{{ title }}</h1>
+  <p>{{ items.length > 0 ? 'Items available' : 'No items' }}</p>
   ```
 
-- **Using Interpolation and Bindings**  
-  Interpolation binds data from the component to the template.  
+- **Template Statements**  
+  Template statements respond to user actions and are used in event bindings. They can call component methods or assign values.
   Example:
   ```html
-  <input [value]="name" />
+  <button (click)="addItem()">Add Item</button>
   ```
+
+- **Using Structural Directives**  
+  Structural directives like `*ngIf` and `*ngFor` dynamically modify the DOM structure.
+  Example:
+  ```html
+  <ul>
+    <li *ngFor="let item of items">{{ item }}</li>
+  </ul>
+  ```
+
+- **Using Attribute Directives**  
+  Attribute directives like `[ngClass]` and `[ngStyle]` modify the appearance or behavior of elements.
+  Example:
+  ```html
+  <div [ngStyle]="{'color': isActive ? 'green' : 'red'}">Status</div>
+  ```
+
+- **Template Reference Variables**  
+  Use `#` to declare variables in templates and access DOM elements or component instances.
+  Example:
+  ```html
+  <input #inputRef />
+  <button (click)="logValue(inputRef.value)">Log Value</button>
+  ```
+
+- **Dynamic Components**  
+  Templates can include dynamic components using Angular's `ng-container` or `ng-template`.
+  Example:
+  ```html
+  <ng-container *ngIf="isLoaded">
+    <app-child></app-child>
+  </ng-container>
+  ```
+
+- **Best Practices**  
+  - Keep templates simple and focused on presentation.
+  - Avoid complex logic in template expressions; move it to the component.
+  - Use Angular's built-in directives and pipes to simplify template code.
 
 ### Interaction
 
