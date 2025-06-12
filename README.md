@@ -1,20 +1,21 @@
 # Angular Core Concepts Overview
 
-## Components
+## Core Concepts
+### Components
 - **What are Components?**
 - **Creating a Component**
 - **Component Metadata**
 
-## Modules
+### Modules
 - **What are Modules?**
 - **NgModule Basics**
 - **Feature Modules**
 
-## Services
+### Services
 - **What is a Service?**
 - **Creating and Using Services**
 
-## Dependency Injection (DI)
+### Dependency Injection (DI)
 - **What is Dependency Injection?**
 - **Basic Configuration**
 - **Using DI in Angular**
@@ -32,7 +33,7 @@
 - **Template Syntax**
 - **Using Interpolation and Bindings**
 
-### Component Interaction
+### Interaction
 - **Parent to Child Communication**
 - **Child to Parent Communication**
 - **Using `@Input` and `@Output`**
@@ -45,15 +46,15 @@
 - **What is View Encapsulation?**
 - **Encapsulation Modes**
 
-## Built-in Directives
+### Built-in Directives
 - **Overview of Structural Directives**
 - **Overview of Attribute Directives**
 
-## Built-in Pipes
+### Built-in Pipes
 - **What are Pipes?**
 - **Commonly Used Pipes**
 
-## Angular CLI Overview
+## Angular CLI
 - **What is Angular CLI?**
 - **Common CLI Commands**
 
