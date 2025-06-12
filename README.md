@@ -318,6 +318,7 @@
     **Best Practices**:
     - Use two-way binding only when necessary, as it can make debugging more complex.
     - For better control, consider using separate property and event bindings instead of `[(ngModel)]` when appropriate.
+    
   - **Directives**: Use structural (`*ngIf`, `*ngFor`) and attribute (`[ngClass]`, `[ngStyle]`) directives to manipulate the DOM.
     Example:
     ```html
@@ -383,25 +384,108 @@
   Use `@Input` to pass data from a parent to a child component.  
   Example:
 
+  **Parent Component**:
   ```typescript
-  @Input() name: string;
+  @Component({
+    selector: 'app-parent',
+    template: `<app-child [name]="parentName"></app-child>`,
+  })
+  export class ParentComponent {
+    parentName = 'Angular';
+  }
+  ```
+
+  **Child Component**:
+  ```typescript
+  @Component({
+    selector: 'app-child',
+    template: `<p>Hello, {{ name }}!</p>`,
+  })
+  export class ChildComponent {
+    @Input() name!: string;
+  }
   ```
 
 - **Child to Parent Communication**  
   Use `@Output` to emit events from a child to a parent component.  
   Example:
 
+  **Child Component**:
   ```typescript
-  @Output() notify = new EventEmitter<string>();
+  @Component({
+    selector: 'app-child',
+    template: `<button (click)="notifyParent()">Notify Parent</button>`,
+  })
+  export class ChildComponent {
+    @Output() notify = new EventEmitter<string>();
+
+    notifyParent() {
+      this.notify.emit('Child says hello!');
+    }
+  }
+  ```
+
+  **Parent Component**:
+  ```typescript
+  @Component({
+    selector: 'app-parent',
+    template: `<app-child (notify)="onNotify($event)"></app-child>`,
+  })
+  export class ParentComponent {
+    onNotify(message: string) {
+      console.log(message);
+    }
+  }
   ```
 
 - **Using `@Input` and `@Output`**  
-  Combine `@Input` and `@Output` for two-way communication.  
-  Example:
+  Combine `@Input` and `@Output` for two-way communication between parent and child components.  
+
+  **How it Works**:  
+  - The `@Input` decorator allows the parent component to pass data to the child component. The child component receives this data as an input property.
+  - The `@Output` decorator, combined with `EventEmitter`, allows the child component to emit events to the parent component. The parent listens to these events and updates its state accordingly.
+  - The `[( )]` syntax in the parent component is a shorthand for binding the input property (`[ ]`) and listening to the output event (`( )`) simultaneously.
+
+  **Example**:
+
+  **Child Component**:
   ```typescript
-  @Input() value: string;
-  @Output() valueChange = new EventEmitter<string>();
+  @Component({
+    selector: 'app-child',
+    template: `
+      <input [value]="value" (input)="onValueChange($event.target.value)" />
+    `,
+  })
+  export class ChildComponent {
+    @Input() value!: string;
+    @Output() valueChange = new EventEmitter<string>();
+
+    onValueChange(newValue: string) {
+      this.valueChange.emit(newValue);
+    }
+  }
   ```
+
+  **Parent Component**:
+  ```typescript
+  @Component({
+    selector: 'app-parent',
+    template: `
+      <app-child [(value)]="parentValue"></app-child>
+      <p>Parent Value: {{ parentValue }}</p>
+    `,
+  })
+  export class ParentComponent {
+    parentValue = 'Initial Value';
+  }
+  ```
+
+  **Explanation**:
+  - The `value` property in the parent component is bound to the `@Input` property in the child component.
+  - When the user types in the input field in the child component, the `onValueChange` method emits the new value using the `valueChange` event.
+  - The parent component listens to the `valueChange` event and updates its `parentValue` property, which is then passed back to the child component via the `@Input` binding.
+
+  This creates a seamless two-way communication between the parent and child components.
 
 ### Styles
 
@@ -421,32 +505,101 @@
 ### View Encapsulation
 
 - **What is View Encapsulation?**  
-  View encapsulation determines how styles are applied to components.  
-  Example:
-
-  ```typescript
-  encapsulation: ViewEncapsulation.None;
-  ```
+  View Encapsulation in Angular determines how styles defined in a component are applied to its template and whether they affect other parts of the application. It ensures that styles are scoped to specific components, preventing unintended side effects on other components.
 
 - **Encapsulation Modes**  
-  Modes include `Emulated`, `None`, and `ShadowDom`.
+  Angular provides three modes of view encapsulation:
+
+  1. **Emulated (Default)**:  
+     - Styles are scoped to the component using a mechanism that emulates Shadow DOM behavior.  
+     - Angular rewrites CSS selectors to include unique attributes, ensuring styles are applied only to the component.  
+     - Example:  
+       ```typescript
+       @Component({
+         selector: 'app-example',
+         template: `<h1>Hello</h1>`,
+         styles: [`h1 { color: red; }`],
+         encapsulation: ViewEncapsulation.Emulated, // Default
+       })
+       export class ExampleComponent {}
+       ```
+
+  2. **None**:  
+     - Styles are applied globally to the entire application.  
+     - There is no encapsulation, and styles defined in the component can affect other components.  
+     - Example:  
+       ```typescript
+       @Component({
+         selector: 'app-example',
+         template: `<h1>Hello</h1>`,
+         styles: [`h1 { color: red; }`],
+         encapsulation: ViewEncapsulation.None,
+       })
+       export class ExampleComponent {}
+       ```
+
+  3. **ShadowDom**:  
+     - Uses the browser's native Shadow DOM to scope styles to the component.  
+     - Styles are encapsulated within the Shadow DOM, ensuring they do not leak out or affect other components.  
+     - Example:  
+       ```typescript
+       @Component({
+         selector: 'app-example',
+         template: `<h1>Hello</h1>`,
+         styles: [`h1 { color: red; }`],
+         encapsulation: ViewEncapsulation.ShadowDom,
+       })
+       export class ExampleComponent {}
+       ```
+
+- **Comparison of Modes**  
+  | Mode         | Style Scope       | Affects Other Components | Browser Support |
+  |--------------|-------------------|--------------------------|-----------------|
+  | **Emulated** | Component-specific | No                       | All browsers    |
+  | **None**     | Global             | Yes                      | All browsers    |
+  | **ShadowDom**| Component-specific | No                       | Modern browsers |
+
+- **Best Practices**  
+  - Use **Emulated** (default) for most cases to ensure styles are scoped to components without affecting others.  
+  - Use **None** sparingly, only when global styles are required.  
+  - Use **ShadowDom** for strict encapsulation when working with modern browsers and when leveraging native Shadow DOM features.
 
 ### Built-in Directives
 
 - **Overview of Structural Directives**  
-  Structural directives like `*ngIf` and `*ngFor` modify the DOM structure.  
-  Example:
+  Structural directives in Angular are used to modify the structure of the DOM by adding or removing elements. Here is a list of commonly used structural directives:
 
-  ```html
-  <div *ngIf="isVisible">Visible</div>
-  ```
+  1. **`*ngIf`**: Conditionally includes or excludes an element in the DOM based on a boolean expression.  
+     Example:  
+     ```html
+     <div *ngIf="isVisible">Visible</div>
+     ```
 
-- **Overview of Attribute Directives**  
-  Attribute directives like `ngClass` and `ngStyle` modify the appearance or behavior of elements.  
-  Example:
-  ```html
-  <div [ngClass]="{'active': isActive}"></div>
-  ```
+  2. **`*ngFor`**: Iterates over a collection and renders an element for each item.  
+     Example:  
+     ```html
+     <ul>
+       <li *ngFor="let item of items">{{ item }}</li>
+     </ul>
+     ```
+
+  3. **`*ngSwitch`**: A set of directives (`*ngSwitch`, `*ngSwitchCase`, `*ngSwitchDefault`) used to conditionally display elements based on a matching expression.  
+     Example:  
+     ```html
+     <div [ngSwitch]="value">
+       <p *ngSwitchCase="'A'">Case A</p>
+       <p *ngSwitchCase="'B'">Case B</p>
+       <p *ngSwitchDefault>Default Case</p>
+     </div>
+     ```
+
+  4. **`*ngTemplateOutlet`**: Dynamically includes an Angular template in the DOM.  
+     Example:  
+     ```html
+     <ng-container *ngTemplateOutlet="templateRef"></ng-container>
+     ```
+
+  - **Custom Structural Directives**: Developers can also create custom structural directives to implement specific DOM manipulation logic.
 
 ### Built-in Pipes
 
@@ -464,6 +617,65 @@
   ```html
   <p>{{ price | currency:'USD' }}</p>
   ```
+
+- **Built-in Pipes**  
+  Angular provides several built-in pipes to transform data in templates. Here is a list of commonly used pipes:
+
+  1. **`DatePipe`**: Formats a date value according to locale rules.  
+     Example:  
+     ```html
+     <p>{{ today | date:'short' }}</p>
+     ```
+
+  2. **`UpperCasePipe`**: Transforms text to uppercase.  
+     Example:  
+     ```html
+     <p>{{ 'hello' | uppercase }}</p>
+     ```
+
+  3. **`LowerCasePipe`**: Transforms text to lowercase.  
+     Example:  
+     ```html
+     <p>{{ 'HELLO' | lowercase }}</p>
+     ```
+
+  4. **`CurrencyPipe`**: Formats a number as currency.  
+     Example:  
+     ```html
+     <p>{{ price | currency:'USD' }}</p>
+     ```
+
+  5. **`DecimalPipe`**: Formats a number with decimal points.  
+     Example:  
+     ```html
+     <p>{{ 1234.5678 | number:'1.2-2' }}</p>
+     ```
+
+  6. **`PercentPipe`**: Formats a number as a percentage.  
+     Example:  
+     ```html
+     <p>{{ 0.25 | percent }}</p>
+     ```
+
+  7. **`JsonPipe`**: Converts a value into a JSON string.  
+     Example:  
+     ```html
+     <pre>{{ object | json }}</pre>
+     ```
+
+  8. **`SlicePipe`**: Extracts a portion of a string or array.  
+     Example:  
+     ```html
+     <p>{{ 'Angular' | slice:0:3 }}</p>
+     ```
+
+  9. **`AsyncPipe`**: Unwraps values from Promises or Observables.  
+     Example:  
+     ```html
+     <p>{{ observableValue | async }}</p>
+     ```
+
+  - **Custom Pipes**: Developers can also create custom pipes to implement specific data transformation logic.
 
 ## Angular CLI
 
@@ -593,6 +805,22 @@
   this.route.snapshot.params["id"];
   ```
 
+  ```typescript
+  import { Component, OnInit } from '@angular/core';
+  import { ActivatedRoute } from '@angular/router';
+
+  @Component({...})
+  export class MyComponent implements OnInit {
+    constructor(private route: ActivatedRoute) {}
+
+    ngOnInit() {
+      this.route.params.subscribe(params => {
+        console.log(params['id']);
+      });
+    }
+  }
+  ```
+
 - **Activated Route**  
   Use `ActivatedRoute` to access route parameters and data.  
   Example:
@@ -623,32 +851,4 @@
   Example:
   ```typescript
   this.router.navigate(["../child"], { relativeTo: this.route });
-  ```
-
-## RxJS
-
-- **What is RxJS?**  
-  RxJS is a library for reactive programming using observables.  
-  Example:
-
-  ```typescript
-  of(1, 2, 3).subscribe((value) => console.log(value));
-  ```
-
-- **Mapping Observables to Promises**  
-  Use `toPromise` to convert observables to promises.  
-  Example:
-
-  ```typescript
-  this.http
-    .get("/api/data")
-    .toPromise()
-    .then((data) => console.log(data));
-  ```
-
-- **Common RxJS Operators**  
-  Examples include `map`, `filter`, `mergeMap`, and `switchMap`.  
-  Example:
-  ```typescript
-  this.http.get("/api/data").pipe(map((data) => data.items));
   ```
